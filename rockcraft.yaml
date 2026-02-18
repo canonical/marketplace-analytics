@@ -1,0 +1,16 @@
+name: marketplace-analytics
+base: ubuntu@24.04
+version: '0.1'
+summary: Marketplace Analytics
+description: Marketplace Analytics service
+platforms:
+  amd64:
+  arm64:
+
+extensions:
+  - flask-framework
+
+parts:
+  flask-framework/dependencies:
+    stage-packages:
+      - libpq-dev
