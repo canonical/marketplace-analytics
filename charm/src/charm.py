@@ -21,7 +21,7 @@ class MarketplaceAnalyticsCharm(paas_charm.flask.Charm):
         """Initialize the instance.
 
         Args:
-            args: passthrough to CharmBase.
+            args: passthrough to CharmBase
         """
         super().__init__(*args)
 
