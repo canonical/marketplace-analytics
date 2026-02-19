@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: write
+  actions: read
+
 jobs:
   pack-and-publish:
     uses: ./.github/workflows/pack-and-publish.yaml
