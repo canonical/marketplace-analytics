@@ -13,7 +13,7 @@ db = SQLAlchemy(app)
 
 @app.route("/")
 def index():
-    return "Marketplace Analytics"
+    return "Marketplace Analytics 21"
 
 
 @app.route("/db-test")
