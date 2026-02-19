@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Publish
 
 on:
   push:
@@ -6,65 +6,10 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup LXD
-        uses: canonical/setup-lxd@main
-
-      # Build rock
-      - name: Install rockcraft
-        run: sudo snap install rockcraft --classic
-
-      - name: Cache rock
-        id: cache-rock
-        uses: actions/cache@v4
-        with:
-          path: "*.rock"
-          key: rock-${{ hashFiles('rockcraft.yaml', 'app.py', 'requirements.txt') }}
-
-      - name: Pack rock
-        if: steps.cache-rock.outputs.cache-hit != 'true'
-        run: rockcraft pack
-
-      - name: Set image URL
-        id: image
-        run: |
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          echo "url=ghcr.io/${REPO_LOWER}:${{ github.sha }}" >> $GITHUB_OUTPUT
-
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Push rock to GHCR
-        run: |
-          ROCK_FILE=$(ls *.rock)
-          skopeo --insecure-policy copy \
-            oci-archive:$ROCK_FILE \
-            docker://${{ steps.image.outputs.url }} \
-            --dest-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}"
-
-      # Build charm
-      - name: Install charmcraft
-        run: sudo snap install charmcraft --classic
-
-      - name: Cache charm
-        id: cache-charm
-        uses: actions/cache@v4
-        with:
-          path: "charm/*.charm"
-          key: charm-${{ hashFiles('charm/**') }}
-
-      - name: Pack charm
-        if: steps.cache-charm.outputs.cache-hit != 'true'
-        run: cd charm && charmcraft pack -v
-
-      - name: Upload charm
-        uses: actions/upload-artifact@v4
-        with:
-          name: charm
-          path: "charm/*.charm"
-          retention-days: 1
+  pack-and-publish:
+    uses: ./.github/workflows/pack-and-publish.yaml
+    with:
+      charm_name: marketplace-analytics
+      channel: latest/edge
+    secrets:
+      CHARMHUB_TOKEN: ${{ secrets.CHARMHUB_TOKEN }}
