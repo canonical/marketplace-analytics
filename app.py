@@ -2,6 +2,8 @@ import logging
 
 from flask import Flask, jsonify, render_template, redirect, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from sqlalchemy import text
 from config import Config
@@ -13,6 +15,7 @@ logging.basicConfig(
 
 db = SQLAlchemy()
 migrate = Migrate()
+limiter = Limiter(key_func=get_remote_address, default_limits=[])
 
 
 def create_app(config_class=Config):
@@ -21,6 +24,7 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     migrate.init_app(app, db)
+    limiter.init_app(app)
 
     import models  # noqa: F401 - register models with SQLAlchemy
 

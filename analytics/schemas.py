@@ -20,4 +20,7 @@ class EventBatchSchema(Schema):
     events = fields.List(
         fields.Nested(EventSchema), required=True
     )
-    app_name = fields.String(required=True)
+    app_name = fields.String(
+        required=True,
+        validate=validate.OneOf(["snapcraft", "charmhub"]),
+    )

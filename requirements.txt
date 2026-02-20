@@ -5,3 +5,4 @@ psycopg2-binary
 marshmallow
 Flask-OpenID
 django-openid-auth
+flask-limiter
