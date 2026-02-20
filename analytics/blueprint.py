@@ -46,3 +46,45 @@ def ingest_events():
         return "", 204
 
     return "", 204
+
+
+@analytics_blueprint.route("/events", methods=["GET"])
+def get_events():
+    app_name = request.args.get("app_name")
+    event_type = request.args.get("event_type")
+    session_id = request.args.get("session_id")
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 50, type=int)
+    per_page = min(per_page, 200)
+
+    query = Event.query.order_by(Event.timestamp.desc())
+
+    if app_name:
+        query = query.filter(Event.app_name == app_name)
+    if event_type:
+        query = query.filter(Event.event_type == event_type)
+    if session_id:
+        query = query.filter(Event.session_id == session_id)
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify({
+        "events": [
+            {
+                "event_id": str(e.event_id),
+                "event_type": e.event_type,
+                "event_source": e.event_source,
+                "timestamp": e.timestamp.isoformat(),
+                "session_id": e.session_id,
+                "app_name": e.app_name,
+                "target": e.target,
+                "url": e.url,
+                "attributes": e.attributes,
+            }
+            for e in pagination.items
+        ],
+        "total": pagination.total,
+        "page": pagination.page,
+        "per_page": pagination.per_page,
+        "pages": pagination.pages,
+    })
