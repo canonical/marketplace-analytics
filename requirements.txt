@@ -6,3 +6,4 @@ marshmallow
 Flask-OpenID
 django-openid-auth
 flask-limiter
+flask-cors

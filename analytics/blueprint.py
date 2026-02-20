@@ -1,6 +1,7 @@
 import logging
 
 from flask import Blueprint, request, jsonify
+from flask_cors import cross_origin
 
 from app import db, limiter
 from models import Event
@@ -15,6 +16,7 @@ _batch_schema = EventBatchSchema()
 
 
 @analytics_blueprint.route("/events", methods=["POST"])
+@cross_origin(origins=["https://snapcraft.io", "https://charmhub.io"])
 @limiter.limit("100/minute")
 def ingest_events():
     data = request.get_json(silent=True)
