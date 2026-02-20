@@ -11,6 +11,15 @@ extensions:
   - flask-framework
 
 parts:
+  flask-framework/install-app:
+    prime:
+      - flask/app/app.py
+      - flask/app/config.py
+      - flask/app/migrate.py
+      - flask/app/models.py
+      - flask/app/analytics
+      - flask/app/migrations
+
   flask-framework/dependencies:
     stage-packages:
       - libpq-dev

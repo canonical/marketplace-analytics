@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.rock
+*.charm
+.venv/
+instance/
+*.db
+.tox/
+.coverage
+.idea/
+.vscode/
