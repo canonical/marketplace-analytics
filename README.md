@@ -1,6 +1,6 @@
 # Marketplace Analytics
 
-Analytics service for the marketplace.
+Analytics service for the marketplace. Collects anonymous event-based analytics (clicks, hovers, views) from marketplace applications.
 
 ## Local development
 
@@ -20,6 +20,17 @@ source .venv/bin/activate
 pip install -r requirements.txt
 POSTGRESQL_DB_CONNECT_STRING=postgresql://user:pass@localhost:5432/marketplace_analytics flask run
 ```
+
+## Authentication
+
+- `POST /analytics/events` is public (no auth required)
+- `GET /analytics/events` and `/dashboard` require Ubuntu SSO login with `canonical-webmonkeys` Launchpad team membership
+- `/login` - redirects to Ubuntu SSO
+- `/logout` - clears session
+
+## Dashboard
+
+Visit `/dashboard` to view events in a table with filters (app name, event type, session ID) and pagination. Requires login.
 
 ## API
 
@@ -55,6 +66,8 @@ Request body:
 Returns `204 No Content` on success.
 
 ### Get events
+
+Requires authentication.
 
 ```bash
 # All events

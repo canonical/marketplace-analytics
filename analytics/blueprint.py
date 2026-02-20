@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from models import Event
 from analytics.schemas import EventBatchSchema
+from auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,7 @@ def ingest_events():
 
 
 @analytics_blueprint.route("/events", methods=["GET"])
+@login_required
 def get_events():
     app_name = request.args.get("app_name")
     event_type = request.args.get("event_type")

@@ -1,6 +1,6 @@
 import logging
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import text
@@ -25,12 +25,22 @@ def create_app(config_class=Config):
     import models  # noqa: F401 - register models with SQLAlchemy
 
     from analytics.blueprint import analytics_blueprint
+    from auth.sso import init_sso
+    from auth.decorators import login_required
 
     app.register_blueprint(analytics_blueprint)
+    init_sso(app)
 
     @app.route("/")
     def index():
-        return "Marketplace Analytics"
+        if "user" in session:
+            return redirect("/dashboard")
+        return redirect("/login")
+
+    @app.route("/dashboard")
+    @login_required
+    def dashboard():
+        return render_template("dashboard.html", user=session["user"])
 
     @app.route("/db-test")
     def dbtest():

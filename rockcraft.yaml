@@ -18,6 +18,9 @@ parts:
       - flask/app/migrate.py
       - flask/app/models.py
       - flask/app/analytics
+      - flask/app/auth
+      - flask/app/static
+      - flask/app/templates
       - flask/app/migrations
 
   flask-framework/dependencies:

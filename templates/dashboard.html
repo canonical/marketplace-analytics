@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketplace Analytics</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+  <div class="user-bar">
+    <h1>Marketplace Analytics</h1>
+    <div>
+      <span class="user">{{ user.nickname }}</span> &middot; <a href="/logout">Logout</a>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>App name</label>
+      <input type="text" id="f-app" placeholder="e.g. snapcraft">
+    </div>
+    <div class="filter-group">
+      <label>Event type</label>
+      <select id="f-type">
+        <option value="">All</option>
+        <option value="click">click</option>
+        <option value="view">view</option>
+        <option value="hover">hover</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Session ID</label>
+      <input type="text" id="f-session" placeholder="abc-123">
+    </div>
+    <div class="filter-group">
+      <label>Per page</label>
+      <select id="f-perpage">
+        <option value="20">20</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+    <button class="btn-apply" onclick="currentPage=1; loadEvents()">Apply</button>
+    <button class="btn-clear" onclick="clearFilters()">Clear</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>App</th>
+        <th>Type</th>
+        <th>Source</th>
+        <th>Session</th>
+        <th>Target</th>
+        <th>URL</th>
+        <th>Attributes</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="pagination">
+    <button id="prev-btn" onclick="prevPage()">Prev</button>
+    <span id="page-info" class="meta"></span>
+    <button id="next-btn" onclick="nextPage()">Next</button>
+  </div>
+
+  <script>
+    let currentPage = 1;
+    let totalPages = 1;
+
+    function loadEvents() {
+      const params = new URLSearchParams();
+      const app = document.getElementById("f-app").value.trim();
+      const type = document.getElementById("f-type").value;
+      const session = document.getElementById("f-session").value.trim();
+      const perPage = document.getElementById("f-perpage").value;
+
+      if (app) params.set("app_name", app);
+      if (type) params.set("event_type", type);
+      if (session) params.set("session_id", session);
+      params.set("page", currentPage);
+      params.set("per_page", perPage);
+
+      fetch("/analytics/events?" + params.toString())
+        .then(r => {
+          if (r.status === 401) { window.location.href = "/login?next=/dashboard"; return null; }
+          return r.json();
+        })
+        .then(data => {
+          if (!data) return;
+          totalPages = data.pages || 1;
+          document.getElementById("page-info").textContent =
+            "Page " + data.page + " of " + totalPages + " (" + data.total + " events)";
+          document.getElementById("prev-btn").disabled = data.page <= 1;
+          document.getElementById("next-btn").disabled = data.page >= totalPages;
+
+          const tbody = document.getElementById("tbody");
+          if (data.events.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="empty">No events found</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data.events.map(e => `<tr>
+            <td title="${e.timestamp}">${formatTime(e.timestamp)}</td>
+            <td>${esc(e.app_name)}</td>
+            <td>${esc(e.event_type)}</td>
+            <td>${esc(e.event_source)}</td>
+            <td title="${esc(e.session_id)}">${esc(e.session_id)}</td>
+            <td>${esc(e.target || "-")}</td>
+            <td title="${esc(e.url || "")}">${esc(e.url || "-")}</td>
+            <td class="attr-json"><pre>${e.attributes ? esc(JSON.stringify(e.attributes, null, 2)) : "-"}</pre></td>
+          </tr>`).join("");
+        })
+        .catch(err => {
+          document.getElementById("tbody").innerHTML =
+            '<tr><td colspan="8" class="empty">Error loading events</td></tr>';
+        });
+    }
+
+    function formatTime(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) +
+        " " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
+
+    function esc(s) {
+      const d = document.createElement("div");
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function prevPage() { if (currentPage > 1) { currentPage--; loadEvents(); } }
+    function nextPage() { if (currentPage < totalPages) { currentPage++; loadEvents(); } }
+    function clearFilters() {
+      document.getElementById("f-app").value = "";
+      document.getElementById("f-type").value = "";
+      document.getElementById("f-session").value = "";
+      document.getElementById("f-perpage").value = "50";
+      currentPage = 1;
+      loadEvents();
+    }
+
+    loadEvents();
+  </script>
+</body>
+</html>
