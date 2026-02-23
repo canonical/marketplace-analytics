@@ -1,9 +1,15 @@
-name: Build and Publish
+name: Build and Deploy
 
 on:
   push:
     branches:
       - main
+
+env:
+  CHARM_NAME: marketplace-analytics
+  CHANNEL: latest/edge
+  JAAS_CONTROLLER: jaas.ps7.canonical.com:443/k8s-jaas-ps7-jimm-jimm
+  JUJU_MODEL: 795798e4-922f-49c7-9169-004ffc17df90@serviceaccount/k8s-stg-marketplace-marketplace-analytics
 
 permissions:
   contents: read
@@ -18,3 +24,25 @@ jobs:
       channel: latest/edge
     secrets:
       CHARMHUB_TOKEN: ${{ secrets.CHARMHUB_TOKEN }}
+
+  deploy:
+    name: Deploy to PS7
+    runs-on: ubuntu-latest
+    needs: pack-and-publish
+    steps:
+      - name: Install Juju
+        run: sudo snap install juju --classic
+
+      - name: Login to JAAS
+        env:
+          JUJU_CLIENT_ID: ${{ secrets.JUJU_CLIENT_ID }}
+          JUJU_CLIENT_SECRET: ${{ secrets.JUJU_CLIENT_SECRET }}
+        run: |
+          juju login ${{ env.JAAS_CONTROLLER }} -c jaas-ps7 \
+            --client-id "$JUJU_CLIENT_ID" --client-secret "$JUJU_CLIENT_SECRET"
+
+      - name: Switch to model
+        run: juju switch ${{ env.JUJU_MODEL }}
+
+      - name: Refresh charm
+        run: juju refresh ${{ env.CHARM_NAME }} --channel=${{ env.CHANNEL }}
