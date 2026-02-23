@@ -6,6 +6,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from sqlalchemy import text
+from werkzeug.middleware.proxy_fix import ProxyFix
 from config import Config
 
 logging.basicConfig(
@@ -22,6 +23,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
     db.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)
