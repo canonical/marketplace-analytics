@@ -35,12 +35,12 @@ jobs:
 
       - name: Login to JAAS
         env:
-          JIMM_CLIENT_ID: ${{ secrets.JUJU_CLIENT_ID }}
-          JIMM_CLIENT_SECRET: ${{ secrets.JUJU_CLIENT_SECRET }}
+          JUJU_CLIENT_ID: ${{ secrets.JUJU_CLIENT_ID }}
+          JUJU_CLIENT_SECRET: ${{ secrets.JUJU_CLIENT_SECRET }}
         run: juju login ${{ env.JAAS_CONTROLLER }} -c jaas-ps7
 
-      - name: Switch to model
-        run: juju switch ${{ env.JUJU_MODEL }}
-
       - name: Refresh charm
-        run: juju refresh ${{ env.CHARM_NAME }} --channel=${{ env.CHANNEL }}
+        env:
+          JUJU_CLIENT_ID: ${{ secrets.JUJU_CLIENT_ID }}
+          JUJU_CLIENT_SECRET: ${{ secrets.JUJU_CLIENT_SECRET }}
+        run: juju refresh ${{ env.CHARM_NAME }} --channel=${{ env.CHANNEL }} -m ${{ env.JUJU_MODEL }}
