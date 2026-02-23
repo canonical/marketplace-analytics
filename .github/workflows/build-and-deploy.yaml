@@ -35,11 +35,9 @@ jobs:
 
       - name: Login to JAAS
         env:
-          JUJU_CLIENT_ID: ${{ secrets.JUJU_CLIENT_ID }}
-          JUJU_CLIENT_SECRET: ${{ secrets.JUJU_CLIENT_SECRET }}
-        run: |
-          juju login ${{ env.JAAS_CONTROLLER }} -c jaas-ps7 \
-            --client-id "$JUJU_CLIENT_ID" --client-secret "$JUJU_CLIENT_SECRET"
+          JIMM_CLIENT_ID: ${{ secrets.JUJU_CLIENT_ID }}
+          JIMM_CLIENT_SECRET: ${{ secrets.JUJU_CLIENT_SECRET }}
+        run: juju login ${{ env.JAAS_CONTROLLER }} -c jaas-ps7
 
       - name: Switch to model
         run: juju switch ${{ env.JUJU_MODEL }}
