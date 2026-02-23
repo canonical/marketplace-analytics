@@ -6,7 +6,6 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from sqlalchemy import text
-from werkzeug.middleware.proxy_fix import ProxyFix
 from config import Config
 
 logging.basicConfig(
@@ -19,11 +18,25 @@ migrate = Migrate()
 limiter = Limiter(key_func=get_remote_address, default_limits=[])
 
 
+class ReverseProxied:
+    """Make Flask aware of the real scheme and path prefix behind HAProxy + traefik."""
+
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        environ["wsgi.url_scheme"] = "https"
+        prefix = environ.get("HTTP_X_FORWARDED_PREFIX", "")
+        if prefix:
+            environ["SCRIPT_NAME"] = prefix
+        return self.app(environ, start_response)
+
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+    app.wsgi_app = ReverseProxied(app.wsgi_app)
     db.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)
