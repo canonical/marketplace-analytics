@@ -10,7 +10,7 @@
   <div class="user-bar">
     <h1>Marketplace Analytics</h1>
     <div>
-      <span class="user">{{ user.nickname }}</span> &middot; <a href="/logout">Logout</a>
+      <span class="user">{{ user.nickname }}</span> &middot; <a href="{{ url_for('logout') }}">Logout</a>
     </div>
   </div>
 
@@ -83,9 +83,9 @@
       params.set("page", currentPage);
       params.set("per_page", perPage);
 
-      fetch("/analytics/events?" + params.toString())
+      fetch("{{ url_for('analytics.get_events') }}?" + params.toString())
         .then(r => {
-          if (r.status === 401) { window.location.href = "/login?next=/dashboard"; return null; }
+          if (r.status === 401) { window.location.href = "{{ url_for('login') }}?next={{ url_for('dashboard') }}"; return null; }
           return r.json();
         })
         .then(data => {

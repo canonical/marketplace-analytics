@@ -29,7 +29,7 @@ def init_sso(app):
     @app.route("/logout")
     def logout():
         empty_session(flask.session)
-        return flask.redirect("/")
+        return flask.redirect(flask.url_for("index"))
 
     @app.route("/login", methods=["GET", "POST"])
     @open_id.loginhandler

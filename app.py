@@ -1,6 +1,6 @@
 import logging
 
-from flask import Flask, jsonify, render_template, redirect, session
+from flask import Flask, jsonify, render_template, redirect, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -38,12 +38,13 @@ def create_app(config_class=Config):
     @app.route("/")
     def index():
         if "user" in session:
-            return redirect("/dashboard")
-        return redirect("/login")
+            return redirect(url_for("dashboard"))
+        return redirect(url_for("login"))
 
     @app.route("/dashboard")
-    @login_required
     def dashboard():
+        if "user" not in session:
+            return redirect(url_for("login", next=url_for("dashboard")))
         return render_template("dashboard.html", user=session["user"])
 
     @app.route("/db-test")
