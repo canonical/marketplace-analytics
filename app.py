@@ -32,7 +32,8 @@ class ReverseProxied:
         self.app = app
 
     def __call__(self, environ, start_response):
-        environ["wsgi.url_scheme"] = "https"
+        scheme = environ.get("HTTP_X_FORWARDED_PROTO", "http")
+        environ["wsgi.url_scheme"] = scheme
         prefix = environ.get("HTTP_X_FORWARDED_PREFIX", "")
         if prefix:
             environ["SCRIPT_NAME"] = prefix

@@ -18,7 +18,7 @@ class EventSchema(Schema):
     attributes = fields.Dict(load_default=None)
 
     @validates("attributes")
-    def validate_attributes(self, value):
+    def validate_attributes(self, value, **kwargs):
         if value and len(json.dumps(value)) > 4096:
             raise ValidationError("Attributes must not exceed 4KB.")
 
