@@ -79,7 +79,10 @@ def create_app(config_class=Config):
         return jsonify({
             "remote_addr": flask_request.remote_addr,
             "x_forwarded_for": flask_request.headers.get("X-Forwarded-For"),
+            "x_forwarded_proto": flask_request.headers.get("X-Forwarded-Proto"),
+            "x_forwarded_prefix": flask_request.headers.get("X-Forwarded-Prefix"),
             "x_real_ip": flask_request.headers.get("X-Real-Ip"),
+            "scheme": flask_request.scheme,
             "resolved_client_ip": get_client_ip(),
         })
 
