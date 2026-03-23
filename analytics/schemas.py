@@ -6,7 +6,7 @@ from marshmallow import Schema, fields, validate, validates, ValidationError
 class EventSchema(Schema):
     event_type = fields.String(
         required=True,
-        validate=validate.OneOf(["click", "hover", "view", "page_view"]),
+        validate=validate.OneOf(["click", "hover", "view", "page_view", "custom"]),
     )
     event_source = fields.String(
         load_default="frontend",
