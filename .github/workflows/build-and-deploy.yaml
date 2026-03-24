@@ -31,7 +31,7 @@ jobs:
     needs: pack-and-publish
     steps:
       - name: Install Juju
-        run: sudo snap install juju --classic
+        run: sudo snap install juju --classic --channel=3/stable
 
       - name: Login to JAAS
         env:
