@@ -4,6 +4,22 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "analytics/**"
+      - "auth/**"
+      - "charm/**"
+      - "migrations/**"
+      - "static/**"
+      - "templates/**"
+      - "app.py"
+      - "config.py"
+      - "models.py"
+      - "migrate.py"
+      - "requirements.txt"
+      - "rockcraft.yaml"
+      - "Dockerfile"
+      - "entrypoint.sh"
+      - "docker-compose.yaml"
 
 env:
   CHARM_NAME: marketplace-analytics
