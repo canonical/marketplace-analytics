@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  CHARM_NAME: marketplace-analytics
+  CHANNEL: latest/edge
+  JAAS_CONTROLLER: jaas.ps7.canonical.com:443/k8s-jaas-ps7-jimm-jimm
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Set model
+        id: model
+        run: |
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            echo "model=795798e4-922f-49c7-9169-004ffc17df90@serviceaccount/k8s-prod-marketplace-analytics" >> "$GITHUB_OUTPUT"
+          else
+            echo "model=795798e4-922f-49c7-9169-004ffc17df90@serviceaccount/k8s-stg-marketplace-marketplace-analytics" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install Juju
+        run: sudo snap install juju --classic --channel=3/stable
+
+      - name: Login to JAAS
+        env:
+          JUJU_CLIENT_ID: ${{ secrets.JUJU_CLIENT_ID }}
+          JUJU_CLIENT_SECRET: ${{ secrets.JUJU_CLIENT_SECRET }}
+        run: juju login ${{ env.JAAS_CONTROLLER }} -c jaas-ps7
+
+      - name: Refresh charm
+        env:
+          JUJU_CLIENT_ID: ${{ secrets.JUJU_CLIENT_ID }}
+          JUJU_CLIENT_SECRET: ${{ secrets.JUJU_CLIENT_SECRET }}
+        run: juju refresh ${{ env.CHARM_NAME }} --channel=${{ env.CHANNEL }} -m ${{ steps.model.outputs.model }}
