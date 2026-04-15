@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    image: postgres:18
     environment:
       POSTGRES_DB: marketplace_analytics
       POSTGRES_USER: postgres
